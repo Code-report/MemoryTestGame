@@ -10,6 +10,7 @@ import functools
 import os
 import random
 import threading
+from collections import deque, defaultdict
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import Qt, QObject, pyqtSignal, QEvent
@@ -20,6 +21,8 @@ from constant import *
 
 global level
 global time
+global hint_time
+global answers
 
 
 class Ui_Dialog(object):
@@ -197,20 +200,33 @@ class Ui_Dialog(object):
         global time
         time = STOPWATCH_TIME
 
+        global hint_time
+        hint_time = HINT_TIME
+
         self.label.setText("Level " + str(level))
         self.startButton.setEnabled(False)
         self.setGameBoard()
+        print(hint_time)
 
         def hintProcess():
-            self.label_2.setText(str(HINT_TIME))
-            schedule = threading.Timer(1, stopwatchProcess)
+            global hint_time
+
+            self.label_2.setText(str(hint_time))
+            schedule = threading.Timer(1, hintProcess)
             schedule.start()
+            print(hint_time)
+            if hint_time == 0:
+                schedule.cancel()
+                self.hideImage
+                stopwatchProcess()
+
+            hint_time -= 1
+        hintProcess()
 
         def stopwatchProcess():
             global time
 
             self.label_2.setText(str(time))
-
             schedule = threading.Timer(1, stopwatchProcess)
             schedule.start()
 
@@ -220,7 +236,6 @@ class Ui_Dialog(object):
 
             time -= 1
 
-        stopwatchProcess()
 
     def setGameBoard(self):
         global level
@@ -229,26 +244,27 @@ class Ui_Dialog(object):
         self.changeImageLabel(mixed_image_list)
 
     def changeImageLabel(self, mixed_image_list):
+        global answers
+        answers = defaultdict(list)
         tile_number_list = []
         for i in range(IMAGE_TILE_COUNT):
             tile_number_list.append(str(i + 1))
         random.shuffle(tile_number_list)
 
-
-
         for image_index in range(len(mixed_image_list)):
             label_name = "image_label_" + tile_number_list.__getitem__(image_index)
-            pixmap = QPixmap(IMAGE_PATH + mixed_image_list.__getitem__(image_index))
-
-            # TODO Answer Setting
-
+            image_name = mixed_image_list.__getitem__(image_index)
+            settingAnswers(image_name, label_name)
+            pixmap = QPixmap(IMAGE_PATH + image_name)
 
             for i in reversed(range(self.gridLayoutWidget.count())):
                 select_widget = self.gridLayoutWidget.itemAt(i).widget()
                 if label_name == select_widget.objectName():
                     select_widget.setPixmap(pixmap)
 
-
+    def hideImage(self):
+        for child in self.gridLayoutWidget.findChildren(QtWidgets.QWidget):
+            child.setEnabled(False)
 
     def mouseReleaseEvent(self, event):  # event : QMouseEvent
         if event.button() == Qt.LeftButton:
@@ -274,25 +290,30 @@ def randomMixImageName(image_list, level):
     return mixed_image_list
 
 
-def clickable(widget):
-    class Filter(QObject):
+def settingAnswers(image_name, label_name):
+    global answers
+    answers[image_name].append(label_name)
+    print('answers={}'.format(answers))
 
-        clicked = pyqtSignal()
-
-        def eventFilter(self, obj, event):
-
-            if obj == widget:
-                if event.type() == QEvent.MouseButtonRelease:
-                    if obj.rect().contains(event.pos()):
-                        self.clicked.emit()
-                        # The developer can opt for .emit(obj) to get the object within the slot.
-                        return True
-
-            return False
-
-    filter = Filter(widget)
-    widget.installEventFilter(filter)
-    return filter.clicked
+# def clickable(widget):
+#     class Filter(QObject):
+#
+#         clicked = pyqtSignal()
+#
+#         def eventFilter(self, obj, event):
+#
+#             if obj == widget:
+#                 if event.type() == QEvent.MouseButtonRelease:
+#                     if obj.rect().contains(event.pos()):
+#                         self.clicked.emit()
+#                         # The developer can opt for .emit(obj) to get the object within the slot.
+#                         return True
+#
+#             return False
+#
+#     filter = Filter(widget)
+#     widget.installEventFilter(filter)
+#     return filter.clicked
 
 
 if __name__ == "__main__":
