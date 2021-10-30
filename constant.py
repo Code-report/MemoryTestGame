@@ -1,6 +1,6 @@
 # SETTING
 STOPWATCH_TIME = 10
-HINT_TIME = 1
+HINT_TIME = 5
 ICON_NAME = "brain.png"
 
 # PATH

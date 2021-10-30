@@ -23,6 +23,8 @@ global level
 global time
 global hint_time
 global answers
+global selected_image_count
+global selected_image
 
 
 class Ui_Dialog(object):
@@ -186,10 +188,45 @@ class Ui_Dialog(object):
         self.gridLayoutWidget.addWidget(self.image_label_16, 3, 3)
 
         self.image_label_1.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_1)
+        self.image_label_2.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_2)
+        self.image_label_3.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_3)
+        self.image_label_4.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_4)
+        self.image_label_5.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_5)
+        self.image_label_6.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_6)
+        self.image_label_7.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_7)
+        self.image_label_8.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_8)
+        self.image_label_9.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_9)
+        self.image_label_10.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_10)
+        self.image_label_11.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_11)
+        self.image_label_12.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_12)
+        self.image_label_13.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_13)
+        self.image_label_14.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_14)
+        self.image_label_15.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_15)
+        self.image_label_16.mouseReleaseEvent = functools.partial(self.imageClickEvent, source_object=self.image_label_16)
+
+        global selected_image_count
+        selected_image_count = 0
+        global selected_image
+        selected_image = []
 
     def imageClickEvent(self, event, source_object=None):
+        global selected_image_count
+        global selected_image
+        global answers
+
         if event.button() == QtCore.Qt.LeftButton:
+            selected_image_count += 1
+            print(selected_image)
+            for key, value in answers.items():
+                if source_object.objectName() in value:
+                    if(key in selected_image):
+                        print('정답')
+                    selected_image.append(key)
             print(source_object.objectName())
+            if selected_image_count == 2:
+                selected_image = []
+                selected_image_count = 0
+                self.hideImage()
 
     def startButtonClicked(self):
         # Level Setting
@@ -263,8 +300,12 @@ class Ui_Dialog(object):
                     select_widget.setPixmap(pixmap)
 
     def hideImage(self):
-        for child in self.gridLayoutWidget.findChildren(QtWidgets.QWidget):
-            child.setEnabled(False)
+        # TODO HIDE IMAGE
+        self.image_label_1.setPixmap().hide()
+        self.image_label_2.hide()
+        self.image_label_3.hide()
+        self.image_label_4.hide()
+        self.image_label_5.hide()
 
     def mouseReleaseEvent(self, event):  # event : QMouseEvent
         if event.button() == Qt.LeftButton:
